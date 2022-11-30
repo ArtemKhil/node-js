@@ -15,8 +15,8 @@
     "age": 56
   },
   {
-    "name": "Svitlana",
-    "age": 57,
+    "name": "Roger",
+    "age": 47,
     "id": 5
   },
   {
@@ -28,5 +28,20 @@
     "name": "Andrew",
     "age": 23,
     "id": 7
+  },
+  {
+    "name": "AndrewHL",
+    "age": 57,
+    "id": 8
+  },
+  {
+    "name": "ArtHL",
+    "age": 56,
+    "id": 9
+  },
+  {
+    "name": "Arthir",
+    "age": 34,
+    "id": 10
   }
 ]
