@@ -1,14 +1,19 @@
 const express = require('express');
-const {fileServices} = require('./services');
+const mongoose = require('mongoose');
+
+require('dotenv').config();
+const configs = require("./configs/configs");
+const {userRouter, carRouter} = require("./routers");
 
 const app = express();
-const userRouter = require('./routers/user.router');
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
+
 app.use('/users', userRouter);
+app.use('/cars', carRouter);
 
-app.listen(5000, () => {
-    console.log('Server listen 5000');
+app.listen(configs.PORT, async () => {
+    await mongoose.connect(configs.MONGO_URL)
+    console.log(`Server listen ${configs.PORT}`);
 });
-

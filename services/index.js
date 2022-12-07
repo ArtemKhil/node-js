@@ -1,3 +1,5 @@
 module.exports = {
     fileServices: require('./file.services'),
+    userServices: require('./user.services'),
+    carServices: require('./car.services')
 };

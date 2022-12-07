@@ -1,11 +1,11 @@
-const {fileServices} = require("../services");
+const {userServices} = require("../services");
 
 
 module.exports = {
 
     getAllUsers: async (req, res, next) => {
         try {
-            const users = await fileServices.reader();
+            const users = await userServices.findByParams();
             res.json(users);
         } catch (e) {
             next(e);
@@ -14,22 +14,8 @@ module.exports = {
 
     createUser: async (req, res, next) => {
         try {
-            const userInfo = req.body;
-
-            const users = await fileServices.reader();
-
-            const newUser = {
-                id: users[users.length - 1].id + 1,
-                name: userInfo.name,
-                age: userInfo.age,
-            };
-
-            users.push(newUser);
-
-            await fileServices.writer(users);
-
-            res.status(201).json(newUser);
-
+            const user = await userServices.create(req.body);
+            res.status(201).json(user);
         } catch (e) {
             next(e)
         }
@@ -45,14 +31,11 @@ module.exports = {
 
     updateUserById: async (req, res, next) => {
         try {
-            const {user, users, body} = req;
+            const newUserInfo = req.body;
+            const userId = req.params.userId;
 
-            const index = users.findIndex((u) => u.id === user.id);
-            users[index] = {...users[index], ...body};
-
-            await fileServices.writer(users);
-            res.status(201).json(users[index]);
-
+            const user = await userServices.updateOne(userId, newUserInfo);
+            res.status(201).json(user);
         } catch (e) {
             next(e);
         }
@@ -60,14 +43,8 @@ module.exports = {
 
     deleteUser: async (req, res, next) => {
         try {
-            const {user, users} = req;
-
-            const index = users.findIndex((u) => u.id === user.id);
-            users.splice(index, 1);
-
-            await fileServices.writer(users);
-
-            res.sendStatus(204);
+            await userServices.deleteOne(req.params.userId)
+            res.status(204).send('Deleted');
         } catch (e) {
             next(e);
         }
