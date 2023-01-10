@@ -1,6 +1,8 @@
+const User = require('../dataBase/User');
 const {userServices} = require("../services");
-const myError = require('../errors/myError');
-const {userNormalizer} = require("../helper");
+const {userNormalizer} = require("../helpers");
+const MyError = require("../errors/myError");
+const {userValidator, commonValidator} = require("../validators");
 
 module.exports = {
 
@@ -9,13 +11,13 @@ module.exports = {
             const {name, age, email} = req.body;
 
             if (!age || age < 0 || Number.isNaN(+age)) {
-                throw new myError('age is invalid', 400);
+                throw new MyError('age is invalid', 400);
             }
             if (!name || name.length < 3 || typeof name !== 'string') {
-                throw new myError('name is too short', 400);
+                throw new MyError('name is too short', 400);
             }
             if (!email || !email.includes('@')) {
-                throw new myError('Wrong email', 400);
+                throw new MyError('Wrong email', 400);
             }
 
             next()
@@ -23,18 +25,19 @@ module.exports = {
             next(e);
         }
     },
+
     isBodyValidUpdate: (req, res, next) => {
         try {
             const {name, age, email} = req.body;
 
             if (age && (age < 0 || Number.isNaN(+age))) {
-                throw new myError('age is invalid', 400);
+                throw new MyError('age is invalid', 400);
             }
             if (name && (name.length < 3 || typeof name !== 'string')) {
-                throw new myError('name is too short', 400);
+                throw new MyError('name is too short', 400);
             }
             if (email && !email.includes('@')) {
-                throw new myError('Wrong email', 400);
+                throw new MyError('Wrong email', 400);
             }
             next()
 
@@ -49,7 +52,7 @@ module.exports = {
             const user = await userServices.findOneByParams({_id: userId});
 
             if (!user) {
-                throw new myError('User not found', 404);
+                throw new MyError('User not found', 404);
             }
 
             req.user = user;
@@ -60,16 +63,32 @@ module.exports = {
         }
     },
 
+    getUserDynamically: (fieldName, from = 'body', dbField = fieldName) => async (req, res, next) => {
+        try {
+            const fieldToSearch = req[from][fieldName];
+            const user = await User.findOne({[dbField]: fieldToSearch});
+
+            if (!user) {
+                throw new MyError('User not found', 404);
+            }
+
+            req.user = user;
+            next()
+        } catch (e) {
+            next(e)
+        }
+    },
+
     checkIsEmailUnique: async (req, res, next) => {
         try {
             const {email} = req.body;
             if (!email) {
-                throw new myError('Email not found', 404);
+                throw new MyError('Email not found', 404);
             }
 
             const user = await userServices.findOneByParams({email});
             if (user) {
-                throw new myError('User with this email already exists', 409);
+                throw new MyError('User with this email already exists', 409);
             }
 
             next();
@@ -90,4 +109,54 @@ module.exports = {
             next(e)
         }
     },
+
+    isNewUserValid: async (req, res, next) => {
+        try {
+            const validate = userValidator.newUserValidator.validate(req.body);
+
+            if (validate.error) {
+                throw new MyError(validate.error.message, 400);
+            }
+
+            req.body = validate.value;
+            next()
+
+        } catch (e) {
+            next(e);
+        }
+    },
+
+    isEditUserValid: async (req, res, next) => {
+        try {
+            const validate = userValidator.editUserValidator.validate(req.body);
+
+            if (validate.error) {
+                throw new MyError(validate.error.message, 400);
+            }
+
+            req.body = validate.value;
+            next()
+
+        } catch (e) {
+            next(e);
+        }
+    },
+
+    isUserIdValid: async (req, res, next) => {
+        try {
+            const {userId} = req.params;
+
+            const validate = commonValidator.idValidator.validate(userId);
+
+            if (validate.error) {
+                throw new MyError(validate.error.message, 400);
+            }
+
+            next();
+
+        } catch (e) {
+            next(e);
+        }
+    },
+
 };

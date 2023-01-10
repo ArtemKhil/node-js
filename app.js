@@ -3,15 +3,16 @@ const mongoose = require('mongoose');
 
 require('dotenv').config();
 const configs = require("./configs/configs");
-const {userRouter, carRouter} = require("./routers");
+const {userRouter, carRouter, authRouter} = require("./routers");
 
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
-app.use('/users', userRouter);
+app.use('/auth', authRouter);
 app.use('/cars', carRouter);
+app.use('/users', userRouter);
 
 app.listen(configs.PORT, async () => {
     await mongoose.connect(configs.MONGO_URL)
