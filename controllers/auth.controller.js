@@ -1,10 +1,13 @@
-const {oauthServices} = require("../services");
+const {oauthServices, emailServices} = require("../services");
 const OAuth = require('../dataBase/OAuth');
+const {WELCOME} = require("../configs/email-actions.enum");
 
 module.exports = {
     login: async (req, res, next) => {
         try {
             const {user, body} = req;
+
+            await emailServices.sendEmail('artemkhilchenko09@gmail.com', WELCOME, {userName: user.name});
 
             await oauthServices.comparePasswords(user.password, body.password);
 
