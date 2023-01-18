@@ -34,6 +34,8 @@ module.exports = {
             if (!tokenInfo) {
                 throw new MyError('Token is not valid', 401);
             }
+
+            req.tokenInfo = tokenInfo;
             next()
         } catch (e) {
             next(e)
