@@ -17,5 +17,17 @@ router.post(
     authMiddleware.checkRefreshToken,
     authController.refresh);
 
+router.post(
+    '/password/forgot',
+    userMiddleware.getUserDynamically('email'),
+    authController.forgotPassword
+);
+
+router.put(
+    '/password/forgot',
+    authMiddleware.checkActionToken,
+    authController.restorePasswordAfterForgot
+);
+
 
 module.exports = router;

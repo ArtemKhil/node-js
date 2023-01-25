@@ -2,8 +2,15 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const MyError = require("../errors/myError");
-const {ACCESS_SECRET, REFRESH_SECRET} = require("../configs/configs");
+const {
+    ACCESS_SECRET,
+    REFRESH_SECRET,
+    CONFIRM_ACCOUNT_ACTION_TOKEN_SECRET,
+    FORGOT_PASSCODE_ACTION_TOKEN_SECRET
+} = require("../configs/configs");
 const {tokenTypeEnum} = require("../enums");
+const tokenTypes = require('../configs/token-action.enum');
+
 
 module.exports = {
     hashPassword: (password) => bcrypt.hash(password, 10),
@@ -26,6 +33,20 @@ module.exports = {
         }
     },
 
+    generateActionToken: (actionType, dataToSign = {}) => {
+        let secretWord = '';
+
+        switch (actionType) {
+            case tokenTypes.CONFIRM_ACCOUNT:
+                secretWord = CONFIRM_ACCOUNT_ACTION_TOKEN_SECRET;
+                break;
+            case tokenTypes.FORGOT_PASSCODE:
+                secretWord = FORGOT_PASSCODE_ACTION_TOKEN_SECRET;
+                break;
+        }
+        return jwt.sign(dataToSign, secretWord, {expiresIn: '7d'});
+    },
+
     checkToken: (token = '', tokenType = tokenTypeEnum.accessToken) => {
         try {
             let secret = '';
@@ -39,4 +60,24 @@ module.exports = {
             throw new MyError('Token is not valid', 401);
         }
     },
+
+    checkActionToken: (token, actionType) => {
+        try {
+            let secretWord = '';
+
+            switch (actionType) {
+                case tokenTypes.CONFIRM_ACCOUNT:
+                    secretWord = CONFIRM_ACCOUNT_ACTION_TOKEN_SECRET;
+                    break;
+                case tokenTypes.FORGOT_PASSCODE:
+                    secretWord = FORGOT_PASSCODE_ACTION_TOKEN_SECRET;
+                    break;
+            }
+
+            jwt.verify(token, secretWord);
+        } catch (e) {
+            throw new MyError('Token is not valid', 401);
+        }
+    },
+
 };

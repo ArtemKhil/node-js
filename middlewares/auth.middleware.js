@@ -1,8 +1,10 @@
 const {authValidator} = require("../validators");
 const MyError = require("../errors/myError");
 const {oauthServices} = require("../services");
+const ActionToken = require('../dataBase/ActionToken');
 const OAuth = require('../dataBase/OAuth');
 const {tokenTypeEnum} = require("../enums");
+const {FORGOT_PASSCODE} = require("../configs/token-action.enum");
 
 
 module.exports = {
@@ -56,9 +58,36 @@ module.exports = {
             }
 
             req.tokenInfo = tokenInfo;
+
             next()
         } catch (e) {
             next(e)
         }
     },
+
+    checkActionToken: async (req, res, next) => {
+        try {
+            const actionToken = req.get('Authorization');
+
+            if (!actionToken) {
+                throw new MyError('No Token', 401);
+            }
+            oauthServices.checkActionToken(actionToken, FORGOT_PASSCODE);
+
+            const tokenInfo = await ActionToken
+                .findOne({token: actionToken, tokenType: FORGOT_PASSCODE})
+                .populate('_user_id');
+
+            if (!tokenInfo) {
+                throw new MyError('Token is not valid', 401);
+            }
+
+            req.user = tokenInfo._user_id;
+
+            next()
+        } catch (e) {
+            next(e)
+        }
+    }
+
 };
