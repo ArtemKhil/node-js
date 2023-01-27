@@ -1,13 +1,13 @@
 const nodemailer = require('nodemailer');
-const EmailTemplates = require('email-templates');
+const hbs = require('nodemailer-express-handlebars');
 const path = require('path');
 
-const {NO_REPLY_EMAIL, NO_REPLY_EMAIL_PASSWORD} = require('../configs/configs');
+const {NO_REPLY_EMAIL, NO_REPLY_EMAIL_PASSWORD, FRONTEND_URL} = require('../configs/configs');
 const emailTemplates = require('../email-templates');
 const MyError = require("../errors/myError");
 
 
-const sendEmail = async (receiverEmail, emailAction, locals = {}) => {
+const sendEmail = async (receiverEmail, emailAction, context = {}) => {
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
@@ -18,28 +18,33 @@ const sendEmail = async (receiverEmail, emailAction, locals = {}) => {
 
     const templateInfo = emailTemplates[emailAction];
 
-    if (!templateInfo) {
+    if (!templateInfo?.subject || !templateInfo.templateName) {
         throw new MyError('Wrong template', 500);
     }
 
-    const templateViewer = new EmailTemplates({
-        views: {
-            root: path.join(process.cwd(), 'email-templates')
-        }
-    });
+    const options = {
+        viewEngine: {
+            defaultLayout: 'main',
+            layoutsDir: path.join(process.cwd(), 'email-templates', 'layouts'),
+            partialsDir: path.join(process.cwd(), 'email-templates', 'partials'),
+            extname: '.hbs'
+        },
+        extName: '.hbs',
+        viewPath: path.join(process.cwd(), 'email-templates', 'views')
+    };
 
-    Object.assign(locals || {}, {frontendURL: 'google.com'});
+    transporter.use('compile', hbs(options));
 
-    const html = await templateViewer.render(templateInfo.templateName, locals);
+    context.frontendURL = FRONTEND_URL;
 
     return transporter.sendMail({
         from: 'no reply',
         to: receiverEmail,
         subject: templateInfo.subject,
-        html
+        template: templateInfo.templateName,
+        context
     });
 };
-
 
 module.exports = {
     sendEmail
