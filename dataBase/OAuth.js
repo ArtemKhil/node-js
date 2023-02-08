@@ -1,4 +1,4 @@
-const {model, Schema} = require('mongoose');
+const {Schema, model} = require('mongoose');
 
 const OAuthSchema = new Schema({
     _user_id: {type: Schema.Types.ObjectId, ref: 'User'},

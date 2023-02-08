@@ -3,8 +3,10 @@ const MyError = require("../errors/myError");
 const {oauthServices} = require("../services");
 const ActionToken = require('../dataBase/ActionToken');
 const OAuth = require('../dataBase/OAuth');
+const OldPassword = require('../dataBase/OldPassword');
 const {tokenTypeEnum} = require("../enums");
 const {FORGOT_PASSCODE} = require("../configs/token-action.enum");
+const {compareOldPasswords} = require("../services/oauth.services");
 
 
 module.exports = {
@@ -88,6 +90,28 @@ module.exports = {
         } catch (e) {
             next(e)
         }
-    }
+    },
+
+    checkOldPasswords: async (req, res, next) => {
+        try {
+            const {user, body} = req.user;
+            const oldPasswords = await OldPassword.find({_user_id: user._id}).lean();
+
+            if (!oldPasswords.length) {
+                return next();
+            }
+
+            const results = await Promise.all(oldPasswords.map((record) => compareOldPasswords(record.password, body.password)));
+
+            const condition = results.some((res) => res);
+
+            if (condition) {
+                throw new MyError('This is old Password', 409);
+            }
+            next()
+        } catch (e) {
+            next(e)
+        }
+    },
 
 };
