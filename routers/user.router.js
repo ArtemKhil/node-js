@@ -11,12 +11,12 @@ router.post('/',
     middleware.isNewUserValid,
     middleware.isBodyValidCreate,
     middleware.userNormalizer,
-    middleware.checkIsEmailUnique,
+    // middleware.checkIsEmailUnique,
     userController.createUser);
 
 router.get('/:userId',
     middleware.isUserIdValid,
-    authMiddleware.checkAccessToken,
+    // authMiddleware.checkAccessToken,
     middleware.getUserDynamically('userId','params','_id'),
     userController.getUserById);
 

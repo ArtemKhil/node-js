@@ -1,0 +1,125 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0",
+    "title": "June-2022"
+  },
+  "paths": {
+    "/users/{userID}": {
+      "get": {
+        "description": "Get user by ID",
+        "tags": [
+          "User"
+        ],
+        "operationId": "getUserById",
+        "parameters": [
+          {
+            "name": "userID",
+            "in": "path",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "$ref": "#/definitions/SingleUser"
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "$ref": "#/definitions/ApiError"
+            }
+          }
+        }
+      },
+      "put": {
+        "description": "Update user",
+        "tags": [
+          "User"
+        ],
+        "operationId": "updateUserById",
+        "parameters": [
+          {
+            "name": "email",
+            "required": false,
+            "type": "string",
+            "in": "formData"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User has been updated",
+            "schema": {
+              "$ref": "#/definitions/SingleUser"
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "$ref": "#/definitions/ApiError"
+            }
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "description": "Get all users",
+        "tags": [
+          "User"
+        ],
+        "operationId": "getAllUsers",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/SingleUser"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "ApiError": {
+      "properties": {
+        "statusCode": {
+          "type": "number",
+          "example": 400
+        },
+        "message": {
+          "type": "string",
+          "example": "Bad request"
+        }
+      }
+    },
+    "SingleUser": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "example": "Artem"
+        },
+        "age": {
+          "type": "integer",
+          "example": 10
+        },
+        "email": {
+          "type": "string",
+          "example": "art324@gmail.com"
+        }
+      }
+    }
+  }
+}

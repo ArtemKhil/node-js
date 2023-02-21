@@ -10,9 +10,9 @@ module.exports = {
         return User.findOne(filter);
     },
 
-    create: async (userInfo) => {
-        return User.create(userInfo);
-    },
+    // create: async (userInfo) => {
+    //     return User.create(userInfo);
+    // },
 
     updateOne: (userId, newUserInfo) => {
         return User.findOneAndUpdate(userId, newUserInfo, {new: true});

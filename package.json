@@ -12,7 +12,8 @@
     "mongoose": "^6.7.5",
     "nodemailer": "^6.8.0",
     "nodemailer-express-handlebars": "^6.0.0",
-    "pug": "^3.0.2"
+    "pug": "^3.0.2",
+    "swagger-ui-express": "^4.6.1"
   },
   "devDependencies": {
     "@types/nodemailer": "^6.4.7"
