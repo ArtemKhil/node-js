@@ -1,21 +1,27 @@
-const {oauthServices, emailServices} = require("../services");
+const {oauthServices, emailServices, smsServices} = require("../services");
 const ActionToken = require('../dataBase/ActionToken');
 const OAuth = require('../dataBase/OAuth');
 const OldPassword = require('../dataBase/OldPassword');
 const User = require('../dataBase/User');
+const {smsActionTypeEnum} = require('../enums');
 const {WELCOME, FORGOT_PASSWORD} = require("../configs/email-actions.enum");
 const {FORGOT_PASSCODE} = require("../configs/token-action.enum");
 const {FRONTEND_URL} = require("../configs/configs");
+const {smsTemplate} = require("../helpers");
 
 module.exports = {
     login: async (req, res, next) => {
         try {
             const {user, body} = req;
 
-            await emailServices.sendEmail('artemkhilchenko09@gmail.com', WELCOME, {userName: user.name});
+            await Promise.allSettled([
+
+                emailServices.sendEmail('artemkhilchenko09@gmail.com', WELCOME, {userName: user.name}),
+
+                smsServices.sendSms(smsTemplate[smsActionTypeEnum.WELCOME]({name: user.name}), '+447453313060')
+            ]);
 
             await user.comparePasswords(body.password);
-            // await oauthServices.comparePasswords(user.password, body.password);
 
             const tokenPair = oauthServices.generateAccessTokenPair({id: user._id});
 
@@ -68,14 +74,14 @@ module.exports = {
 
     restorePasswordAfterForgot: async (req, res, next) => {
         try {
-            const {user,body} = req;
+            const {user, body} = req;
 
             const hashPassword = await oauthServices.hashPassword(body.password);
 
             await OldPassword.create({_user_id: user._id, password: user.password});
 
             await User.deleteOne({token: req.get('Authorization')});
-            await User.updateOne({_id:  user._id}, {password: hashPassword});
+            await User.updateOne({_id: user._id}, {password: hashPassword});
 
             res.json('ok');
         } catch (e) {
