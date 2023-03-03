@@ -1,5 +1,5 @@
 const User = require('../dataBase/User');
-const {userServices} = require("../services");
+const {userServices, s3Services} = require("../services");
 
 
 module.exports = {
@@ -47,6 +47,19 @@ module.exports = {
         try {
             await userServices.deleteOne(req.params.userId)
             res.status(204).send('Deleted');
+        } catch (e) {
+            next(e);
+        }
+    },
+
+    uploadAvatar: async (req, res, next) => {
+        try {
+            const uploadedData = await s3Services.uploadPublicFile(req.files.avatar, 'user', req.user._id);
+
+            const updatedUser = await User.findByIdAndUpdate(req.user._id,{avatar:uploadedData.Location},{new: true});
+
+            res.json(updatedUser);
+
         } catch (e) {
             next(e);
         }

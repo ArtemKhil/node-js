@@ -4,5 +4,6 @@ module.exports = {
     carServices: require('./car.services'),
     oauthServices: require('./oauth.services'),
     emailServices: require('./email.services'),
-    smsServices: require('./sms.services')
+    smsServices: require('./sms.services'),
+    s3Services: require('./s3.services')
 };
